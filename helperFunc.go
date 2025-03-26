@@ -165,6 +165,7 @@ func updateIpGroup(iKuai *api.IKuai, name, url string, preIds string) (err error
 	ips = removeIpv6AndRemoveEmptyLine(ips)
 	ipGroups := group(ips, 1000)
 	//已经获取到新的列表，基本上可以安全删除旧列表了
+	log.Println("ip分组== 获取新的IP分组列表成功", name)
 	err = iKuai.DelIpGroup(preIds)
 	if err == nil {
 		log.Println("ip分组== 删除旧的IP分组列表成功", name, preIds)
@@ -181,7 +182,6 @@ func updateIpGroup(iKuai *api.IKuai, name, url string, preIds string) (err error
 			log.Println("ip分组== ", index, "添加失败，可能是列表太多了，添加太快,爱快没响应。", conf.AddErrRetryWait, "秒后重试", err)
 			time.Sleep(conf.AddWait)
 		}
-
 	}
 	return
 }
@@ -205,6 +205,7 @@ func updateIpv6Group(iKuai *api.IKuai, name, url string, preIds string) (err err
 	ips = removeIpv4AndRemoveEmptyLine(ips)
 	ipGroups := group(ips, 1000)
 	//已经获取到新的列表，基本上可以安全删除旧列表了
+	log.Println("ipv6分组== 获取新的IPv6分组列表成功", name)
 	err = iKuai.DelIpv6Group(preIds)
 	if err == nil {
 		log.Println("ipv6分组== 删除旧的IPv6分组列表成功", name, preIds)
