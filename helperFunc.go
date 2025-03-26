@@ -147,7 +147,7 @@ func group(arr []string, subGroupLength int64) [][]string {
 }
 
 // 更新ip分组
-func updateIpGroup(iKuai *api.IKuai, name, url string) (err error) {
+func updateIpGroup(iKuai *api.IKuai, name, url string, preIds string) (err error) {
 	log.Println("ip分组==  http.get ...", url)
 	resp, err := http.Get(url)
 	if err != nil {
@@ -164,13 +164,19 @@ func updateIpGroup(iKuai *api.IKuai, name, url string) (err error) {
 	ips := strings.Split(string(body), "\n")
 	ips = removeIpv6AndRemoveEmptyLine(ips)
 	ipGroups := group(ips, 1000)
-	timestamp := time.Now().Unix() // 秒级时间戳（10位，如 1620000000）
-	str := strconv.FormatInt(timestamp, 10)
-	last4 := str[len(str)-4:] // 截取字符串最后4位，防止分组名重复导致无法先增加后删除，分组名称最多20个字符，除去 _0_1234 分组名设置中最多13个。
+	//已经获取到新的列表，基本上可以安全删除旧列表了
+	err = iKuai.DelIpGroup(preIds)
+	if err == nil {
+		log.Println("ip分组== 删除旧的IP分组列表成功", name, preIds)
+	} else {
+		log.Println("ip分组== 删除旧的IP分组列表有错误", name, err)
+		return
+	}
+	//删除后，添加新的列表
 	for index, ig := range ipGroups {
 		log.Println("ip分组== ", index, " 正在添加 .... ")
 		ipGroup := strings.Join(ig, ",")
-		err := iKuai.AddIpGroup(name+"_"+strconv.Itoa(index)+"_"+last4, ipGroup)
+		err := iKuai.AddIpGroup(name+"_"+strconv.Itoa(index), ipGroup)
 		if err != nil {
 			log.Println("ip分组== ", index, "添加失败，可能是列表太多了，添加太快,爱快没响应。", conf.AddErrRetryWait, "秒后重试", err)
 			time.Sleep(conf.AddWait)
@@ -181,7 +187,7 @@ func updateIpGroup(iKuai *api.IKuai, name, url string) (err error) {
 }
 
 // 更新ipv6分组
-func updateIpv6Group(iKuai *api.IKuai, name, url string) (err error) {
+func updateIpv6Group(iKuai *api.IKuai, name, url string, preIds string) (err error) {
 	log.Println("ipv6分组==  http.get ...", url)
 	resp, err := http.Get(url)
 	if err != nil {
@@ -198,24 +204,29 @@ func updateIpv6Group(iKuai *api.IKuai, name, url string) (err error) {
 	ips := strings.Split(string(body), "\n")
 	ips = removeIpv4AndRemoveEmptyLine(ips)
 	ipGroups := group(ips, 1000)
-	timestamp := time.Now().Unix() // 秒级时间戳（10位，如 1620000000）
-	str := strconv.FormatInt(timestamp, 10)
-	last4 := str[len(str)-4:] // 截取字符串最后4位，防止分组名重复导致无法先增加后删除，分组名称最多20个字符，除去 _0_1234 分组名设置中最多13个。
+	//已经获取到新的列表，基本上可以安全删除旧列表了
+	err = iKuai.DelIpv6Group(preIds)
+	if err == nil {
+		log.Println("ipv6分组== 删除旧的IPv6分组列表成功", name, preIds)
+	} else {
+		log.Println("ipv6分组== 删除旧的IPv6分组列表有错误", name, err)
+		return
+	}
+	//删除后，添加新的列表
 	for index, ig := range ipGroups {
 		log.Println("ipv6分组== ", index, " 正在添加 .... ")
 		ipGroup := strings.Join(ig, ",")
-		err := iKuai.AddIpv6Group(name+"_"+strconv.Itoa(index)+"_"+last4, ipGroup)
+		err := iKuai.AddIpv6Group(name+"_"+strconv.Itoa(index), ipGroup)
 		if err != nil {
 			log.Println("ipv6分组== ", index, "添加失败，可能是列表太多了，添加太快,爱快没响应。", conf.AddErrRetryWait, "秒后重试", err)
 			time.Sleep(conf.AddWait)
 		}
-
 	}
 	return
 }
 
 // 更新ip端口分流
-func updateStreamIpPort(iKuai *api.IKuai, forwardType string, iface string, nexthop string, srcAddr string, ipGroup string, mode int, ifaceband int) (err error) {
+func updateStreamIpPort(iKuai *api.IKuai, preIds, forwardType string, iface string, nexthop string, srcAddr string, ipGroup string, mode int, ifaceband int) (err error) {
 
 	var ipGroupList []string
 	for _, ipGroupItem := range strings.Split(ipGroup, ",") {
