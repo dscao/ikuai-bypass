@@ -239,12 +239,12 @@ func updateStreamIpPort(iKuai *api.IKuai, preIds, forwardType string, iface stri
 		ipGroupList = append(ipGroupList, data...)
 	}
 	//已经获取到端口分流的ip分组列表，基本上可以安全删除旧规则了
-	log.Println("端口分流== 获取需要分流的IP分组列表成功", name)
+	log.Println("端口分流== 获取需要分流的IP分组列表成功", ipGroup)
 	err = iKuai.DelStreamIpPort(preIds)
 	if err == nil {
-		log.Println("端口分流== 删除旧的端口分流列表成功", streamIpPort.IpGroup, preIds)
+		log.Println("端口分流== 删除旧的端口分流列表成功", ipGroup, preIds)
 	} else {
-		log.Println("端口分流== 删除旧的端口分流列表有错误", streamIpPort.IpGroup, err)
+		log.Println("端口分流== 删除旧的端口分流列表有错误", ipGroup, err)
 		return
 	}
 	//删除后，添加新的列表
