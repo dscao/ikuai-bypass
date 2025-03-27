@@ -61,6 +61,30 @@ ikuai 可以通过分流规则 把openwrt或者其他路由作为爱快的上级
   - `after` : 先更新规则成功后再删除旧规则
   - `before` : 先删除旧规则再更新新规则，如果更新失败会丢失规则
 
+
+
+经测试，如果是使用iv分组+端口分流以及ipv6分组+ACL规则的情况，最好是只自动更新分组列表，规则用手工设置后不要用自动更新。 \
+自动更新有时导致分流规则无效，需要手动重新修改一下对应规则才行，也不知道什么原因。 \
+即使用：command: "/app/ikuai-bypass -c /app/config.yml -r cron -m ip"时 \
+建议：config.yml  最简内容
+
+```yml
+ikuai-url: http://10.10.10.2 # 爱快网页控制台登陆地址 结尾不要加 "/"，如在爱快docker内运行，网关就是爱快地址，可以不写，如不填写，则使用第一个接口的网关地址，
+username: admin # ikuai username 爱快登陆用户名
+password: admin123  # ikuai user password爱快登陆密码
+cron: 0 6 * * * # crontab 执行更新的周期 格式为linux crontab 格式 注意时区问题，也可以用  @every 24h00m00s  表示每间隔24小时执行一次
+AddErrRetryWait: 10s # 自动重试时间间隔 时间格式为 10s  120s
+AddWait: 1s # 添加规则后等待时间 等待爱快反应 适合性能低的设备
+
+ip-group:     # IP分组 和端口分流配合使用
+  - name: 国内  # IP分组名称
+    url:  https://raw.githubusercontent.com/Loyalsoldier/geoip/release/text/cn.txt
+ipv6-group:     # IPv6分组 和ACL规则配合使用
+  - name: 国内v6  # IPv6分组名称
+    url:  https://raw.githubusercontent.com/Loyalsoldier/geoip/release/text/cn.txt
+```
+
+
 ## 更新日志
 - 2025-03-27 同步docker镜像 dscao/ikuai-bypass ，解决时区问题不用下载执行程序。只需配置 config.yml 后，文件映射容器中的 /app/config.yml 启动命令： /app/ikuai-bypass -c /app/config.yml -r cron -m ip
 - 2025-03-27 修改ip分组、ipv6分组的添加删除逻辑：先获取新列表，成功后删除旧分组，再添加新分组。这部分还是放弃delOldRule参数的作用。避免每次分组名不一样需要手动修改ACL规则，同时尽量减少后缀占用分组名长度。
