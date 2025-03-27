@@ -62,6 +62,7 @@ ikuai 可以通过分流规则 把openwrt或者其他路由作为爱快的上级
   - `before` : 先删除旧规则再更新新规则，如果更新失败会丢失规则
 
 ## 更新日志
+- 2025-03-27 同步docker镜像 dscao/ikuai-bypass ，解决时区问题不用下载执行程序。只需配置 config.yml 后，文件映射容器中的 /app/config.yml 启动命令： /app/ikuai-bypass -c /app/config.yml -r cron -m ip
 - 2025-03-27 修改ip分组、ipv6分组的添加删除逻辑：先获取新列表，成功后删除旧分组，再添加新分组。这部分还是放弃delOldRule参数的作用。避免每次分组名不一样需要手动修改ACL规则，同时尽量减少后缀占用分组名长度。
 - 2025-03-25 增加端口分流时能够选择更多参数：负载模式、线路绑定，修复完善delOldRule参数，对于ip分组、ipv6分组及端口分流都默认为先增加后删除，防止增加失败导致原来的规则丢失。
 - 2025-03-23 增加ipv6分组
@@ -116,9 +117,9 @@ mkdir ~/ikuai-bypass/ && cd ~/ikuai-bypass
 
 # 编辑默认的 config.yml  放到主机 ~/ikuai-bypass/config.yml
 # 创建容器 docker/podman
-docker run -itd  --name ikuai-bypass  --privileged=true --restart=always   \
+docker run -itd --name ikuai-bypass --privileged=true --restart=always   \
     -v  ~/ikuai-bypass/config.yml:/app/config.yml   \
-    dscao/ikuai-bypass:main /app/ikuai-bypass -c  /app/config.yml -r cron -m ip
+    dscao/ikuai-bypass /app/ikuai-bypass -c /app/config.yml -r cron -m ip
 ```
 
 ### ikuai docker下
