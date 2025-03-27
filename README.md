@@ -107,18 +107,18 @@ ikuai 可以通过分流规则 把openwrt或者其他路由作为爱快的上级
 
 ### docker
 
-下载linux版本，参考命令如下
+镜像：dscao/ikuai-bypass 已解决时区问题，同步最新版本。
+
+参考命令如下
 
 ```sh
 mkdir ~/ikuai-bypass/ && cd ~/ikuai-bypass
-# 下载amd64版本，如arm版本自行修改
-wget -c https://github.com/joyanhui/ikuai-bypass/releases/download/v0.2.2/ikuai-bypass-linux-amd64.zip
-unzip ikuai-bypass-linux-amd64.zip
-# 编辑默认的 config.yml  略
+
+# 编辑默认的 config.yml  放到主机 ~/ikuai-bypass/config.yml
 # 创建容器 docker/podman
 docker run -itd  --name ikuai-bypass  --privileged=true --restart=always   \
-    -v  ~/ikuai-bypass/:/opt/ikuai-bypass/   \
-    alpine:3.18.4  /opt/ikuai-bypass/ikuai-bypass -c  /opt/ikuai-bypass/config.yml -r cron
+    -v  ~/ikuai-bypass/config.yml:/app/config.yml   \
+    dscao/ikuai-bypass:main /app/ikuai-bypass -c  /app/config.yml -r cron -m ip
 ```
 
 ### ikuai docker下
@@ -148,18 +148,18 @@ docker run -itd  --name ikuai-bypass  --privileged=true --restart=always   \
 
 ### 群晖或compose:
 
-请自行下载`linux`版本的Release，解压后，上传可执行文件和修改后的配置文件到`/volume1/docker/ikuai-bypass/data/`。群晖项目或compose同时运行多个配置文件示例(先安装tzdata让时区设置生效)：
+config.yml 参考说明修改后上传文件到`/volume1/docker/ikuai-bypass/data/`。群晖项目或compose同时运行多个配置文件示例(先安装tzdata让时区设置生效)：
 
 ```version: '3.8'
 
 services:
   ikuai-bypass:
-    image: alpine:latest
+    image: dscao/ikuai-bypass
     container_name: ikuai-bypass
     privileged: true
     volumes:
-      - /volume1/docker/ikuai-bypass/data/:/opt/ikuai-bypass
-    command: sh -c "apk add --no-cache tzdata; /opt/ikuai-bypass/ikuai-bypass -c /opt/ikuai-bypass/config.yml -r cron -m ip & sleep 30 ; /opt/ikuai-bypass/ikuai-bypass -c /opt/ikuai-bypass/config2.yml -r cron -m ip  ; wait"
+      - /volume1/docker/ikuai-bypass/data/config.yml:/app/config.yml
+    command: "/app/ikuai-bypass -c /app/config.yml -r cron -m ip"
     tty: true
 ```
 
