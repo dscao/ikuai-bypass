@@ -34,7 +34,7 @@ jobs:
           images: |
             dscao/ikuai-bypass
           tags: |
-            type=ref,event=branch
+            # type=ref,event=branch
             type=ref,event=pr
             type=semver,pattern=v{{version}}
             type=semver,pattern=v{{major}}.{{minor}}
@@ -53,4 +53,4 @@ jobs:
           file: ./Dockerfile
           platforms: linux/amd64,linux/arm64
           push: true
-          tags: ${{ steps.meta.outputs.tags }},latest
+          tags: ${{ steps.meta.outputs.tags }}
