@@ -62,7 +62,7 @@ ikuai 可以通过分流规则 把openwrt或者其他路由作为爱快的上级
   - `before` : 先删除旧规则再更新新规则，如果更新失败会丢失规则
 
 ## 更新日志
-
+- 2025-03-27 修改ip分组、ipv6分组的添加删除逻辑：先获取新列表，成功后删除旧分组，再添加新分组。这部分还是放弃delOldRule参数的作用。避免每次分组名不一样需要手动修改ACL规则，同时尽量减少后缀占用分组名长度。
 - 2025-03-25 增加端口分流时能够选择更多参数：负载模式、线路绑定，修复完善delOldRule参数，对于ip分组、ipv6分组及端口分流都默认为先增加后删除，防止增加失败导致原来的规则丢失。
 - 2025-03-23 增加ipv6分组
 - 2024-10-04 提供完整的最新的config.yml 文件，供参考
@@ -147,18 +147,18 @@ docker run -itd  --name ikuai-bypass  --privileged=true --restart=always   \
 
 ### 群晖或compose:
 
-请自行下载`linux`版本的Release，解压后，上传可执行文件和修改后的配置文件到`/volume1/docker/ikuai-bypass/data/`。群晖项目或compose同时运行多个配置文件示例：
+请自行下载`linux`版本的Release，解压后，上传可执行文件和修改后的配置文件到`/volume1/docker/ikuai-bypass/data/`。群晖项目或compose同时运行多个配置文件示例(先安装tzdata让时区设置生效)：
 
 ```version: '3.8'
 
 services:
   ikuai-bypass:
-    image: alpine:3.18.4
+    image: alpine:lastest
     container_name: ikuai-bypass
     privileged: true
     volumes:
       - /volume1/docker/ikuai-bypass/data/:/opt/ikuai-bypass
-    command: sh -c "/opt/ikuai-bypass/ikuai-bypass -c /opt/ikuai-bypass/config.yml -r cron -m ip & sleep 30 ; /opt/ikuai-bypass/ikuai-bypass -c /opt/ikuai-bypass/config2.yml -r cron -m ip  ; wait"
+    command: sh -c "apk add --no-cache tzdata; /opt/ikuai-bypass/ikuai-bypass -c /opt/ikuai-bypass/config.yml -r cron -m ip & sleep 30 ; /opt/ikuai-bypass/ikuai-bypass -c /opt/ikuai-bypass/config2.yml -r cron -m ip  ; wait"
     tty: true
 ```
 
