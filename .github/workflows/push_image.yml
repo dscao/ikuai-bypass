@@ -34,10 +34,12 @@ jobs:
           images: |
             dscao/ikuai-bypass
           tags: |
-            # type=ref,event=branch
-            type=ref,event=pr
-            type=semver,pattern=v{{version}}
-            type=semver,pattern=v{{major}}.{{minor}}
+            type=raw,value=${{ steps.parse-tag.outputs.value }},enable=${{ github.event_name == 'workflow_dispatch' }}
+            # 原始自动生成规则（仅非手动触发时生效）
+            type=ref,event=branch,enable=${{ github.event_name != 'workflow_dispatch' }}
+            type=ref,event=pr,enable=${{ github.event_name != 'workflow_dispatch' }}
+            type=semver,pattern=v{{version}},enable=${{ github.event_name != 'workflow_dispatch' }}
+            type=semver,pattern=v{{major}}.{{minor}},enable=${{ github.event_name != 'workflow_dispatch' }}
 
       - name: Log in to DOCKERHUB
         uses: docker/login-action@v3
