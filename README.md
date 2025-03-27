@@ -133,7 +133,7 @@ docker run -itd  --name ikuai-bypass  --privileged=true --restart=always   \
 /data0/Docker/ikuai-bypass/config.yml
 ```
 
-而后在`ikuai`的`docker`中下载通用`linux`镜像，推荐`alpine:lastest`（实测Ubuntu，busybox等镜像不安装证书扩展会报github加速代理的证书问题）。
+而后在`ikuai`的`docker`中下载通用`linux`镜像，推荐`alpine:latest`（实测Ubuntu，busybox等镜像不安装证书扩展会报github加速代理的证书问题）。
 
 创建`docker`目录挂载`/data0/Docker/ikuai-bypass/`到容器内`/opt/ikuai-bypass/`
 
@@ -153,7 +153,7 @@ docker run -itd  --name ikuai-bypass  --privileged=true --restart=always   \
 
 services:
   ikuai-bypass:
-    image: alpine:lastest
+    image: alpine:latest
     container_name: ikuai-bypass
     privileged: true
     volumes:
