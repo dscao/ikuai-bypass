@@ -238,6 +238,16 @@ func updateStreamIpPort(iKuai *api.IKuai, preIds, forwardType string, iface stri
 		}
 		ipGroupList = append(ipGroupList, data...)
 	}
+	//已经获取到端口分流的ip分组列表，基本上可以安全删除旧规则了
+	log.Println("端口分流== 获取需要分流的IP分组列表成功", name)
+	err = iKuai.DelStreamIpPort(preIds)
+	if err == nil {
+		log.Println("端口分流== 删除旧的端口分流列表成功", streamIpPort.IpGroup, preIds)
+	} else {
+		log.Println("端口分流== 删除旧的端口分流列表有错误", streamIpPort.IpGroup, err)
+		return
+	}
+	//删除后，添加新的列表
 	err = iKuai.AddStreamIpPort(forwardType, iface, strings.Join(ipGroupList, ","), srcAddr, nexthop, ipGroup, mode, ifaceband)
 	if err != nil {
 		log.Println("ip端口分流==  添加失败，可能是列表太多了，添加太快,爱快没响应。", conf.AddErrRetryWait, "秒后重试", err)
